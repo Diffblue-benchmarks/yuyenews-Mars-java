@@ -1,0 +1,362 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+units:
+# Target TGF: 270.0
+#  >methods=5
+#  >complexity=107
+#  >construction=18.0
+#  >dependency=0.75
+ - target:
+   - dir: mars-jdbc/mars-mybatis/target/classes
+     file: com/mars/mybatis/util/ReadXml.class
+     sourceDir: mars-jdbc/mars-mybatis/src/main/java
+     sourceFile: com/mars/mybatis/util/ReadXml.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/logger/MarsLogger.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/logger/MarsLogger.java
+   - dir: mars-jdbc/mars-mybatis/target/classes
+     file: com/mars/mybatis/util/ReadXml$1.class
+     sourceDir: mars-jdbc/mars-mybatis/src/main/java
+     sourceFile: com/mars/mybatis/util/ReadXml.java
+# Target TGF: 226.8
+#  >methods=8
+#  >complexity=126
+#  >construction=9.0
+#  >dependency=0.2
+ - target:
+   - dir: mars-jdbc/mars-mybatis/target/classes
+     file: com/mars/mybatis/init/LoadMybatisConfig.class
+     sourceDir: mars-jdbc/mars-mybatis/src/main/java
+     sourceFile: com/mars/mybatis/init/LoadMybatisConfig.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/FileUtil.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/FileUtil.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/logger/MarsLogger.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/logger/MarsLogger.java
+   - dir: mars-jdbc/mars-mybatis/target/classes
+     file: com/mars/mybatis/util/ReadXml.class
+     sourceDir: mars-jdbc/mars-mybatis/src/main/java
+     sourceFile: com/mars/mybatis/util/ReadXml.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/constant/MarsSpace.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/constant/MarsSpace.java
+   - dir: mars-jdbc/mars-jdbc-base/target/classes
+     file: com/mars/jdbc/util/JdbcConfigUtil.class
+     sourceDir: mars-jdbc/mars-jdbc-base/src/main/java
+     sourceFile: com/mars/jdbc/util/JdbcConfigUtil.java
+# Target TGF: 335.742857143
+#  >methods=7
+#  >complexity=175
+#  >construction=27.0
+#  >dependency=0.67619047619
+ - target:
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/HttpUtil.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/HttpUtil.java
+# Target TGF: 206.166666667
+#  >methods=13
+#  >complexity=271
+#  >construction=8.25
+#  >dependency=5.66666666667
+ - target:
+   - dir: mars-jdbc/mars-mj/target/classes
+     file: com/mars/mj/helper/JdbcTemplete.class
+     sourceDir: mars-jdbc/mars-mj/src/main/java
+     sourceFile: com/mars/mj/helper/JdbcTemplete.java
+   - dir: mars-jdbc/mars-mj/target/classes
+     file: com/mars/mj/manager/ConnectionManager.class
+     sourceDir: mars-jdbc/mars-mj/src/main/java
+     sourceFile: com/mars/mj/manager/ConnectionManager.java
+   - dir: mars-jdbc/mars-mj/target/classes
+     file: com/mars/mj/util/DataCheckUtil.class
+     sourceDir: mars-jdbc/mars-mj/src/main/java
+     sourceFile: com/mars/mj/util/DataCheckUtil.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/constant/MarsSpace.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/constant/MarsSpace.java
+   - dir: mars-jdbc/mars-mj/target/classes
+     file: com/mars/mj/helper/DBHelper.class
+     sourceDir: mars-jdbc/mars-mj/src/main/java
+     sourceFile: com/mars/mj/helper/DBHelper.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/ThreadUtil.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/ThreadUtil.java
+# Target TGF: 460.8
+#  >methods=7
+#  >complexity=222
+#  >construction=45.0
+#  >dependency=1.23333333333
+ - target:
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/FileUtil.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/FileUtil.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/logger/MarsLogger.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/logger/MarsLogger.java
+# Target TGF: 208.2
+#  >methods=8
+#  >complexity=195
+#  >construction=27.0
+#  >dependency=1.63333333333
+ - target:
+   - dir: mars-core/target/classes
+     file: com/mars/core/load/LoadBeans.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/load/LoadBeans.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/constant/MarsSpace.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/constant/MarsSpace.java
+# Target TGF: 245.7
+#  >methods=5
+#  >complexity=117
+#  >construction=18.0
+#  >dependency=0.7
+ - target:
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/ReadClass.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/ReadClass.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/logger/MarsLogger.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/logger/MarsLogger.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/ReadClass$1.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/ReadClass.java
+# Target TGF: 167.142857143
+#  >methods=5
+#  >complexity=112
+#  >construction=18.0
+#  >dependency=0.342857142857
+ - target:
+   - dir: mars-ioc/target/classes
+     file: com/mars/ioc/factory/BeanFactory.class
+     sourceDir: mars-ioc/src/main/java
+     sourceFile: com/mars/ioc/factory/BeanFactory.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/logger/MarsLogger.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/logger/MarsLogger.java
+   - dir: mars-aop/target/classes
+     file: com/mars/aop/proxy/CglibProxy.class
+     sourceDir: mars-aop/src/main/java
+     sourceFile: com/mars/aop/proxy/CglibProxy.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/model/MarsBeanModel.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/model/MarsBeanModel.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/constant/MarsSpace.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/constant/MarsSpace.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/annotation/MarsAop.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/annotation/MarsAop.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/model/AopModel.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/model/AopModel.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/annotation/Traction.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/annotation/Traction.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/annotation/MarsAopType.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/annotation/MarsAopType.java
+# Target TGF: 229.5
+#  >methods=4
+#  >complexity=117
+#  >construction=27.0
+#  >dependency=1.16666666667
+ - target:
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/MarsAddressUtil.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/MarsAddressUtil.java
+   - dir: mars-core/target/classes
+     file: com/mars/core/util/ConfigUtil.class
+     sourceDir: mars-core/src/main/java
+     sourceFile: com/mars/core/util/ConfigUtil.java
+# Target TGF: 603.642857143
+#  >methods=13
+#  >complexity=210
+#  >construction=63.0
+#  >dependency=3.89285714286
+ - target:
+   - dir: mars-jdbc/mars-mj/target/classes
+     file: com/mars/mj/helper/DBHelper.class
+     sourceDir: mars-jdbc/mars-mj/src/main/java
+     sourceFile: com/mars/mj/helper/DBHelper.java
+   - dir: mars-jdbc/mars-jdbc-base/target/classes
+     file: com/mars/jdbc/util/JdbcConfigUtil.class
+     sourceDir: mars-jdbc/mars-jdbc-base/src/main/java
+     sourceFile: com/mars/jdbc/util/JdbcConfigUtil.java
